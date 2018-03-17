@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.k2.Adapter.AdapterFactory;
 import com.k2.Expressions.predicate.PredicateBuilder;
+import com.k2.Wiget.testAssemblies.spec.AssemblyC_1;
 import com.k2.Wiget.testTypes.*;
 import com.k2.Wiget.testWigets.TestWigetAssembly;
 import com.k2.Wiget.testWigets.TestWigetFactory;
@@ -41,7 +42,7 @@ public class WigetFactoryTest {
 				"Number: 10\n" + 
 				"Alias: This\n" + 
 				"Title: Is wiget A\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -85,7 +86,7 @@ public class WigetFactoryTest {
 				"}\n" + 
 				"Container B 2 {\n" + 
 				"}\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -117,7 +118,7 @@ public class WigetFactoryTest {
 				"}\n" + 
 				"Container B 2 {\n" + 
 				"}\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -140,7 +141,7 @@ public class WigetFactoryTest {
 				"Number: 10\n" + 
 				"Alias: This\n" + 
 				"Title: Is wiget A\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -175,7 +176,7 @@ public class WigetFactoryTest {
 				"Number: 3\n" + 
 				"Alias: This\n" + 
 				"Title: Is wiget A 3\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -228,7 +229,7 @@ public class WigetFactoryTest {
 				"}\n" + 
 				"Container B 2 {\n" + 
 				"}\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -254,7 +255,33 @@ public class WigetFactoryTest {
 				"Number: 1\n" + 
 				"Alias: SetAlias\n" + 
 				"Title: Is wiget A\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
+		assertEquals(expected, sw.toString());
+		
+	}
+
+	@Test
+	public void setTwiceValueTest() {
+
+		TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
+		
+		TypeA a = new TypeA(10, "This", "Is wiget A");
+		
+		TestWigetAssembly<TestWigetA, TypeA> wa = factory.getAssembly(TestWigetA.class);
+		wa.root()
+				.set(TestWigetA.model.alias, "SetAlias")
+				.set(TestWigetA.model.alias, "SetAliasAgain");
+		
+		StringWriter sw = new StringWriter();
+		
+		wa.output(a, new PrintWriter(sw)).flush();
+		
+		String expected = 
+				"Test wiget A\n" + 
+				"Number: 10\n" + 
+				"Alias: SetAliasAgain\n" + 
+				"Title: Is wiget A\n";
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -291,7 +318,7 @@ public class WigetFactoryTest {
 				"Number: 1\n" + 
 				"Alias: SetAlias\n" + 
 				"Title: Is wiget A 3\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -371,7 +398,7 @@ public class WigetFactoryTest {
 				"Container B 2 {\n" + 
 				"}\n" + 
 				"}\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}
@@ -421,7 +448,99 @@ public class WigetFactoryTest {
 				"}\n" + 
 				"Container C 2 {\n" + 
 				"}\n";
-		System.out.println(sw.toString());
+//		System.out.println(sw.toString());
+		assertEquals(expected, sw.toString());
+		
+	}
+
+	@Test
+	public void assemblyTempleteTest() {
+
+		TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl", "com.k2.Wiget.testAssemblies.impl");
+		
+		PredicateBuilder pb = new PredicateBuilder();
+		
+		TypeC c = new TypeC("WigetC", "This C", "Is wiget C");
+		c.setA(new TypeA(123, "ThisA", "Is embedded in wiget C"));
+		c.addB(new TypeB(999L, "ThisB", "Is a member of C"));
+		c.addB(new TypeB(998L, "ThisB", "Is also a member of C"));
+		c.addB(new TypeB(997L, "ThisB", "Is another member of C"));
+		
+		TestWigetAssembly<AssemblyC_1, TypeC> wa = factory.getAssembly(AssemblyC_1.class);
+		
+		wa.root()
+			.set(AssemblyC_1.model.alias, "Oooh yaah!!")
+			.add(AssemblyC_1.model.cont1, TestWigetA.class, AssemblyC_1.model.a)
+				.set(TestWigetA.model.alias, "AliasA");
+			
+		
+		StringWriter sw = new StringWriter();
+		
+		wa.output(c, new PrintWriter(sw)).flush();
+		
+		String expected = 
+				"Test wiget C\n" + 
+				"Alias: SetAlias\n" + 
+				"Name: Oooh yaah!!\n" + 
+				"Description: This C\n" + 
+				"\n" + 
+				"Test wiget A\n" + 
+				"Number: 123\n" + 
+				"Alias: ThisA\n" + 
+				"Title: Is embedded in wiget C\n" + 
+				"\n" + 
+				"Container C 1 {\n" + 
+				"Test wiget A\n" + 
+				"Number: 123\n" + 
+				"Alias: SetAlias\n" + 
+				"Title: Is embedded in wiget C\n" + 
+				"Test wiget A\n" + 
+				"Number: 123\n" + 
+				"Alias: ThisA\n" + 
+				"Title: Set Title\n" + 
+				"}\n" + 
+				"Container C 2 {\n" + 
+				"Test wiget B\n" + 
+				"Long Number: 999\n" + 
+				"Name: ThisB\n" + 
+				"Title: Is wiget C\n" + 
+				"\n" + 
+				"Container B 1 {\n" + 
+				"}\n" + 
+				"Container B 2 {\n" + 
+				"Test wiget A\n" + 
+				"Number: 123\n" + 
+				"Alias: AliasA\n" + 
+				"Title: Is embedded in wiget C\n" + 
+				"}\n" + 
+				"Test wiget B\n" + 
+				"Long Number: 998\n" + 
+				"Name: ThisB\n" + 
+				"Title: Is wiget C\n" + 
+				"\n" + 
+				"Container B 1 {\n" + 
+				"}\n" + 
+				"Container B 2 {\n" + 
+				"Test wiget A\n" + 
+				"Number: 123\n" + 
+				"Alias: AliasA\n" + 
+				"Title: Is embedded in wiget C\n" + 
+				"}\n" + 
+				"Test wiget B\n" + 
+				"Long Number: 997\n" + 
+				"Name: ThisB\n" + 
+				"Title: Is wiget C\n" + 
+				"\n" + 
+				"Container B 1 {\n" + 
+				"}\n" + 
+				"Container B 2 {\n" + 
+				"Test wiget A\n" + 
+				"Number: 123\n" + 
+				"Alias: AliasA\n" + 
+				"Title: Is embedded in wiget C\n" + 
+				"}\n" + 
+				"}\n";
+//		System.out.println(sw.toString());
 		assertEquals(expected, sw.toString());
 		
 	}

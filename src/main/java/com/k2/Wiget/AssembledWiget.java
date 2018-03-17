@@ -6,13 +6,9 @@ import java.util.List;
 import com.k2.Expressions.expression.CurrentTime;
 import com.k2.Expressions.expression.K2ParameterExpression;
 import com.k2.Expressions.predicate.K2Predicate;
-import com.k2.Wiget.testTypes.TypeA;
-import com.k2.Wiget.testWigets.TestWigetAssembly;
-import com.k2.Wiget.testWigets.spec.TestWigetA;
-import com.k2.Wiget.testWigets.spec.TestWigetC;
 
 @SuppressWarnings("rawtypes")
-public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implements WigetParameterEvaluator<W> {
+public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implements WigetParameterEvaluator<W>, ContainedWiget<O> {
 	
 	private final WigetAssembly<F,O,W,?> assembly;
 	public WigetAssembly<F,O,W,?> assembly() { return assembly; }
@@ -29,6 +25,8 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 	private void setIncludeCriteria(K2Predicate includeCriteria) { this.includeCriteria = includeCriteria; }
 	
 	private WigetParameter<?,?> valueFrom;
+	
+	public WigetParameter<?,?> getFromParameter() { return valueFrom; }
 	
 	
 	@SuppressWarnings("unchecked")
@@ -51,14 +49,20 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 	@SuppressWarnings("unchecked")
 	public O outputContents(WigetContainer container, O out) {
 		
-		List<AssembledWiget> contents = getContents(container);
-		for (AssembledWiget aw : contents) {
-			Object dataSource = get(aw.valueFrom);
-			out = (O) aw.output(dataSource, out);
+		List<ContainedWiget<O>> contents = getContents(container);
+		for (ContainedWiget<O> cw : contents) {
+			if (cw instanceof AssembledWiget) {
+				AssembledWiget<F,O,?,?> aw = (AssembledWiget)cw;
+				Object dataSource = get(aw.valueFrom);
+				out = aw.output(dataSource, out);
+			} else if (cw instanceof ContainerBinding){
+				ContainerBinding<O> cb = (ContainerBinding<O>)cw;
+				out = cb.output(out);
+			}
 		}
 		return out;
 	}
-
+	
 	public O output(Object dataSource, O out) {
 
 		if (parent != null && includeCriteria != null) {
@@ -107,7 +111,7 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 		}
 	}
 	
-	private List<AssembledWiget> getContents(WigetContainer<W> container) {
+	private List<ContainedWiget> getContents(WigetContainer<W> container) {
 		return get(container).getContents();
 	}
 	
@@ -135,9 +139,28 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 			return this;
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new WigetError("Unable to set value of paramter {} from Wiget model {} - {}", e, parameter.getAlias(), model.getClass().getName(), e.getMessage());
-		}
-		
+		}		
 	}
+
+	@SuppressWarnings("unchecked")
+	public <V> AssembledWiget<F, O, ? extends Wiget, ?> bind( WigetParameter<? extends Wiget, V> targetParameter, AssembledWiget sourceAssembly, WigetParameter<? extends Wiget, V> sourceParameter) {
+		try {
+			
+			WigetParameter wp = (WigetParameter) sourceParameter.getModelField().get(sourceAssembly.model);
+			
+			BoundWigetParameter bwp = new BoundWigetParameter(targetParameter.getAlias(), targetParameter.getModelField(), wp, sourceAssembly);
+			targetParameter.getModelField().set(model, bwp);
+			
+			return this;
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new WigetError("Unable to bind the paramter {} from Wiget model {} to values from the parameter {} - {}", e, 
+					targetParameter.getAlias(), 
+					model.getClass().getName(), 
+					sourceParameter.getAlias(), 
+					e.getMessage());
+		}		
+	}
+ 
 
 
 	@Override
@@ -189,9 +212,17 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 		return get((WigetContainer<W>)container).add(aw);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public AssembledWiget<F, O, ? extends Wiget, ?> bind(WigetContainer<?> toContainer, AssembledWiget<F, O, ? extends Wiget, ?> sourceAssembly, WigetContainer<?> fromContainer) {
+		ContainerBinding cb = new ContainerBinding(sourceAssembly, fromContainer);
+		get((WigetContainer<W>)toContainer).add(cb);
+		return this;
+		
+	}
+
 	public AssembledWiget<F,O,?,?> up() { return parent; }
 	
 	public AssembledWiget<F,O,?,?> root() { return assembly.root(); }
- 
+
 
 }

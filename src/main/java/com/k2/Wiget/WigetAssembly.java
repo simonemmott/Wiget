@@ -1,7 +1,5 @@
 package com.k2.Wiget;
 
-import java.io.PrintWriter;
-import java.util.Collection;
 
 @SuppressWarnings("rawtypes")
 public class WigetAssembly<F extends WigetFamily<O>, O, W extends Wiget,T> {

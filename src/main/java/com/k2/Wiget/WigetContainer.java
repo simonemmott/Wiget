@@ -19,13 +19,19 @@ public class WigetContainer<W extends Wiget> {
 	private final Field modelField;
 	public Field getModelField() { return modelField; }
 	
-	private List<AssembledWiget> contents = null;
-	List<AssembledWiget> getContents() { return (contents!=null) ? contents : new ArrayList<AssembledWiget>(); }
+	private List<ContainedWiget> contents = null;
+	List<ContainedWiget> getContents() { return (contents!=null) ? contents : new ArrayList<ContainedWiget>(); }
 	AssembledWiget add(AssembledWiget aw) {
 		if (contents==null)
-			contents = new ArrayList<AssembledWiget>();
+			contents = new ArrayList<ContainedWiget>();
 		contents.add(aw);
 		return aw;
+	}
+	
+	void add(ContainerBinding cb) {
+		if (contents==null)
+			contents = new ArrayList<ContainedWiget>();
+		contents.add(cb);
 	}
 	
 	WigetContainer(String alias, Field modelField) {
