@@ -9,6 +9,7 @@
   </appender>
 
   <logger name="com.k2.Util.ObjectUtil" level="warn"/>
+  <logger name="com.k2.Util.classes.ClassUtil" level="trace"/>
   <logger name="com.k2.Expressions" level="warn"/>
   <logger name="com.k2.Util.StringUtil" level="warn"/>
   <logger name="com.k2.Util.FileUtil" level="warn"/>
