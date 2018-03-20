@@ -11,6 +11,16 @@ import com.k2.Util.StringUtil;
 import com.k2.Util.classes.ClassUtil;
 import com.k2.Wiget.annotation.WigetImplementation;
 
+/**
+ * The abstract wiget AWiget provides the basic structure for all wiget implementations.
+ * 
+ * The abstract wiget unpacks the implementing wiget class to extract the wiget alias and requires type for the wiget from the definition of the implementing class.
+ * @author simon
+ *
+ * @param <F>	The wiget family
+ * @param <O>	The wigets output type
+ * @param <T>	The wiget requires data type
+ */
 public abstract class AWiget<F extends WigetFamily<O>,O,T> implements Wiget<F, O, T> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -20,7 +30,11 @@ public abstract class AWiget<F extends WigetFamily<O>,O,T> implements Wiget<F, O
 
 	private final Class<T> requiresType;
 	@Override public Class<T> requiresType() { return requiresType; }
-	
+
+	/**
+	 * Construct a wiget and extract the alias and requires type from the implementing class definition.
+	 * If the wiget is incorrectly implemented this method will fail with the unchecked WigetError
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AWiget() {
 		if ( ! this.getClass().isAnnotationPresent(WigetImplementation.class))

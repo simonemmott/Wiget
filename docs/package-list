@@ -1,0 +1,15 @@
+com.k2.Wiget
+com.k2.Wiget.annotation
+com.k2.Wiget.templateFactory
+com.k2.Wiget.templateFactory.impl
+com.k2.Wiget.templateFactory.spec
+com.k2.Wiget.templateFactory.types
+com.k2.Wiget.testAdapters
+com.k2.Wiget.testAssemblies.impl
+com.k2.Wiget.testAssemblies.spec
+com.k2.Wiget.testTypes
+com.k2.Wiget.testWigets
+com.k2.Wiget.testWigets.alt
+com.k2.Wiget.testWigets.impl
+com.k2.Wiget.testWigets.incomplete
+com.k2.Wiget.testWigets.spec

@@ -12,6 +12,12 @@ import java.util.List;
 
 import com.k2.Wiget.WigetParameter;
 
+/**
+ * This is the wiget specification of the template specification wiget
+ * 
+ * @author simon
+ *
+ */
 @WigetSpecification
 public interface TemplateSpecification extends TemplateWiget<TemplateDef> {
 	

@@ -20,6 +20,12 @@ import com.k2.Util.classes.ClassUtil;
 import com.k2.Wiget.AssembledWiget;
 import com.k2.Wiget.Wiget;
 
+/**
+ * This wiget implementation generates the java source code for wiget specification of template assemblies
+ * 
+ * @author simon
+ *
+ */
 @WigetImplementation
 public class TemplateSpecificationImpl extends ATemplateWiget<TemplateDef> implements TemplateSpecification{
 	

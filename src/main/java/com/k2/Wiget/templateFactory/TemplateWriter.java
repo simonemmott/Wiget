@@ -17,6 +17,12 @@ import com.k2.Wiget.templateFactory.spec.TemplateImplementation;
 import com.k2.Wiget.templateFactory.spec.TemplateSpecification;
 import com.k2.Wiget.templateFactory.types.TemplateDef;
 
+/**
+ * The TemplateWriter writes the java source for the template assembly weget specification and implementation classes as defined by the supplied data
+ * 
+ * @author simon
+ *
+ */
 public class TemplateWriter {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -24,6 +30,13 @@ public class TemplateWriter {
 	private TemplateFactory factory = new TemplateFactory("com.k2.Wiget.templateFactory.impl");
 	private File outputFolder;
 	private File archiveFolder;
+	/**
+	 * Create a template writer to write the template classes to the given output folder.
+	 * Template writers created in this way move current versions of the template classes to an archive folder created in the output folder.
+	 * 
+	 * @param outputFolder	The output folder in which to write the java source code for the template assembly wigets
+	 * @throws TemplateWriterException	If there is a problem with the given source location
+	 */
 	public TemplateWriter(File outputFolder) throws TemplateWriterException {
 		validateLocation("output", outputFolder);
 		archiveFolder = outputFolder.toPath().resolve("archive").toFile();
@@ -32,6 +45,14 @@ public class TemplateWriter {
 
 		this.outputFolder = outputFolder;
 	}
+	/**
+	 * Create a template writer to write the template classes to the given output folder and archive folder.
+	 * Template writers created in this way move current versions of the template classes to the given archive folder.
+	 * 
+	 * @param outputFolder	The output folder in which to write the java source code for the template assembly wigets
+	 * @param archiveFolder	The floder in which existing java source files will be backed up
+	 * @throws TemplateWriterException	If there is a problem with the given source or archive locations
+	 */
 	public TemplateWriter(File outputFolder, File archiveFolder) throws TemplateWriterException {
 		validateLocation("output", outputFolder);
 		validateLocation("archive", archiveFolder);
@@ -57,6 +78,11 @@ public class TemplateWriter {
 		
 	}
 	
+	/**
+	 * This service method generates the java source code for the given template assemblies wiget specification and implementation classes in the output location defined when this template writer was instantiated
+	 * @param template	The template tofor which to generate and write the java source code
+	 * @throws TemplateWriterException	If there is a problem writing the java source code to the output location or backing up the existing source for the template wiget to the archive location
+	 */
 	public void write(TemplateDef template) throws TemplateWriterException {
 		
 		if (template == null)
