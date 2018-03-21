@@ -394,7 +394,8 @@ public PrintWriter output(
 	
 	return out;
 }
-```C
+```
+
 1.	This call to `outputContents(...)` causes the contents of container `cont1` of this assembled wiget to be included in the output at this point in the order in which they were added to the container.
 1.	The call to `outputContents(...)` outputs the contents of container `cont2`
 
