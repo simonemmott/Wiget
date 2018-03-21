@@ -28,7 +28,7 @@ An assembly of wigets can itself be implemented as a wiget in the same family ge
 
 The wiget project includes an extension of the WigetFamily, WigetFactory and WigetAssembly specifically for generating wiget templates as a pre-assembly of known wigets. These implementations of the WigetFamily, WigetFactory and WigetAssembly together form the TemplateWriter that generates the java source code for wiget templates (wiget specifications and wiget implementations the implement an pre-defined assembly of wigets independently of the implementation of the assembled wigets). Due to the abstraction offered by the Wiget prject the absolute datasource of the TemplateWriter is not constrained only that the object supplied to the template writer must implement the `TemplateDef` interface.
 
-Javadoc documentation of this project can be found [here](https://simonemmott.github.io/Wiget/index.html)
+Javadoc documentation of this project can be found [here](https://simonemmott.github.io/Wiget)
 
 ### License
 
