@@ -256,9 +256,9 @@ The example below shows setting the parameter values on an assembled wiget.
 TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
 
 TestWigetAssembly<TestWigetA, TypeA> wa = factory.getAssembly(TestWigetA.class);
-wa.root()											// <-- (1)
-	.set(TestWigetA.model.alias, "SetAlias") 		// <-- (2)
-	.set(TestWigetA.model.alias, "SetAliasAgain"); 	// <-- (3)
+wa.root()	// <-- (1)
+	.set(TestWigetA.model.alias, "SetAlias")	// <-- (2)
+	.set(TestWigetA.model.alias, "SetAliasAgain");	// <-- (3)
 ```
 
 1.	The `root()` method of a wiget assembly return the root assembled wiget.
@@ -277,12 +277,12 @@ TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
 TestWigetAssembly<TestWigetC, TypeC> wa = factory.getAssembly(TestWigetC.class);
 wa.root()
 	.add(TestWigetC.model.cont1, TestWigetA.class, TestWigetC.model.a)	// <-- (1)
-		.set(TestWigetA.model.alias, "SetAlias")							// <-- (2)
-		.up()															// <-- (3)
+		.set(TestWigetA.model.alias, "SetAlias")	// <-- (2)
+		.up()	// <-- (3)
 	.add(TestWigetC.model.cont1, TestWigetA.class, TestWigetC.model.a)
 		.set(TestWigetA.model.title, "Set Title")
 		.add(TestWigetC.model.cont2, TestWigetB.class, TestWigetC.model.bs)
-			.root();														// <-- (4)
+			.root();		// <-- (4)
 ```
 
 1.	The `add(...)` method of a wiget assembly adds a new assembled wiget to the container identified by the container field of the containing wigets static model for the given wiget to be output using the value supplied by the parameter identified by the parameter field of the containing wigets static model.  
@@ -297,11 +297,11 @@ The example below shows adding a conditional wiget assembly
 ```java
 TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
 
-PredicateBuilder pb = new PredicateBuilder();			// <-- (1)
+PredicateBuilder pb = new PredicateBuilder();	// <-- (1)
 
 TestWigetAssembly<TestWigetC, TypeC> wa = factory.getAssembly(TestWigetC.class);
 wa.root()
-	.addIf(pb.equals(TestWigetC.model.alias, "WigetC"), 	// <-- (2)
+	.addIf(pb.equals(TestWigetC.model.alias, "WigetC"),	// <-- (2)
 			TestWigetC.model.cont1, TestWigetA.class, TestWigetC.model.a)  
 		.up()
 ```
