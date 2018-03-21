@@ -25,7 +25,7 @@ public class TemplateAssembly<W extends Wiget,T> extends WigetAssembly<TemplateF
 	 * @param wigetType	The wiget type of the root assembly
 	 */
 	public TemplateAssembly(
-			TemplateFactory factory, 
+			WigetFactory<TemplateFamily, PrintWriter> factory, 
 			Class<W> wigetType) {
 		super(factory, wigetType);
 		this.indentStr = "\t";
@@ -38,7 +38,7 @@ public class TemplateAssembly<W extends Wiget,T> extends WigetAssembly<TemplateF
 	 * @param indentStr	The String to use for each indentation
 	 */
 	public TemplateAssembly(
-			TemplateFactory factory, 
+			WigetFactory<TemplateFamily, PrintWriter> factory, 
 			Class<W> wigetType, String indentStr) {
 		super(factory, wigetType);
 		this.indentStr = indentStr;

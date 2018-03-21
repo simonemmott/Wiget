@@ -6,7 +6,7 @@ import java.util.TreeSet;
 
 import com.k2.Wiget.annotation.WigetImplementation;
 import com.k2.Wiget.templateFactory.ATemplateWiget;
-import com.k2.Wiget.templateFactory.TypeDefImpl;
+//import com.k2.Wiget.templateFactory.TypeDefImpl;
 import com.k2.Wiget.templateFactory.TemplateAssembly;
 import com.k2.Wiget.templateFactory.TemplateFamily;
 import com.k2.Wiget.templateFactory.spec.TemplateImplementation;
@@ -53,15 +53,15 @@ public class TemplateImplementationImpl extends ATemplateWiget<TemplateDef> impl
 		
 		Set<TypeDef> dependencies = new TreeSet<TypeDef>();
 		
-		dependencies.add(new TypeDefImpl(familyDef.getOutputName()));
-		dependencies.add(new TypeDefImpl("com.k2.Wiget.annotation.WigetImplementation"));
-		dependencies.add(new TypeDefImpl(a.get(TemplateImplementation.model.name)));
-		dependencies.add(new TypeDefImpl("com.k2.Wiget.AssembledWiget"));
-		dependencies.add(new TypeDefImpl("com.k2.Wiget.Wiget"));
-		dependencies.add(new TypeDefImpl(familyDef.getAssemblyName()));
-		dependencies.add(new TypeDefImpl(familyDef.getFactoryName()));
-		dependencies.add(new TypeDefImpl(familyDef.getName()));
-		dependencies.add(new TypeDefImpl(familyDef.getAbstractWigetName()));
+		dependencies.add(new SimpleTypeDef(familyDef.getOutputName()));
+		dependencies.add(new SimpleTypeDef("com.k2.Wiget.annotation.WigetImplementation"));
+		dependencies.add(new SimpleTypeDef(a.get(TemplateImplementation.model.name)));
+		dependencies.add(new SimpleTypeDef("com.k2.Wiget.AssembledWiget"));
+		dependencies.add(new SimpleTypeDef("com.k2.Wiget.Wiget"));
+		dependencies.add(new SimpleTypeDef(familyDef.getAssemblyName()));
+		dependencies.add(new SimpleTypeDef(familyDef.getFactoryName()));
+		dependencies.add(new SimpleTypeDef(familyDef.getName()));
+		dependencies.add(new SimpleTypeDef(familyDef.getAbstractWigetName()));
 		dependencies.add(a.get(TemplateImplementation.model.requiresTypeDef));
 
 		addContainedWigetsToDependencies(dependencies, assemblesWiget);

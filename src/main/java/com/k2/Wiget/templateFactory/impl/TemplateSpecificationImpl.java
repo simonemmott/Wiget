@@ -8,7 +8,7 @@ import java.util.TreeSet;
 
 import com.k2.Wiget.annotation.WigetImplementation;
 import com.k2.Wiget.templateFactory.ATemplateWiget;
-import com.k2.Wiget.templateFactory.TypeDefImpl;
+//import com.k2.Wiget.templateFactory.TypeDefImpl;
 import com.k2.Wiget.templateFactory.TemplateAssembly;
 import com.k2.Wiget.templateFactory.TemplateFamily;
 import com.k2.Wiget.templateFactory.spec.TemplateSpecification;
@@ -57,9 +57,9 @@ public class TemplateSpecificationImpl extends ATemplateWiget<TemplateDef> imple
 			}
 		}
 		
-		dependencies.add(new TypeDefImpl("com.k2.Wiget.annotation.WigetSpecification"));
-		dependencies.add(new TypeDefImpl("com.k2.Wiget.WigetContainer"));
-		dependencies.add(new TypeDefImpl("com.k2.Wiget.WigetParameter"));
+		dependencies.add(new SimpleTypeDef("com.k2.Wiget.annotation.WigetSpecification"));
+		dependencies.add(new SimpleTypeDef("com.k2.Wiget.WigetContainer"));
+		dependencies.add(new SimpleTypeDef("com.k2.Wiget.WigetParameter"));
 		
 		
 		out.println("package "+ClassUtil.getPackageNameFromCanonicalName(a.get(TemplateSpecification.model.name))+";");
