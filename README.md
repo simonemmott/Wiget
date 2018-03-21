@@ -41,6 +41,7 @@ The WigetFactory provides the an assembly of wigets starting with the given root
 In order to use the wiget factory a family of wigets must be defined and a specific extension of the wiget factory must be created to interact with the abstract wiget factory for wigets in the wiget family.
 
 This code:
+
 ```java
 TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl"); // <-- (1)
 
@@ -68,85 +69,114 @@ Title: Is wiget A
 Where TestWigetFactory is:
 
 ```java
-public class TestWigetFactory extends WigetFactory<TestWigetFamily, PrintWriter> {
+public class TestWigetFactory extends WigetFactory<TestWigetFamily, PrintWriter> { // <--(1)
 
-	public TestWigetFactory(String ... packageNames) {
-		super(new TestWigetFamily(), PrintWriter.class, packageNames);
+	public TestWigetFactory(String ... packageNames) {	// <-- (2)
+		super(new TestWigetFamily(), PrintWriter.class, packageNames); // <-- (3)
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public <W extends Wiget,T> TestWigetAssembly<W,T> getAssembly(Class<W> wigetType) {
+	public <W extends Wiget,T> TestWigetAssembly<W,T> getAssembly(Class<W> wigetType) { // <-- (4)
 		return (TestWigetAssembly<W,T>) super.getAssembly(TestWigetAssembly.class, wigetType);
 	}
 
 }
 ```
 
+1.	The specific extension of the abstract WigetFactory defines the specific wiget family and output type in the generic type arguments of the WigetFactory
+1.	The constructor of the extended wiget factory receives the packages to scan for wiget implementations
+1.	The constructor of the extended wiget factory passes an instance of the extended wiget family and the ouput type to the abstract wiget factory with the packages to scan
+1.	The extended wiget factory overrides the `getAssembly(...)` method of the abstract wiget factory to ensure that the method returns instances of the specific extension of the abstract wiget assembly
+
 And TestWigetAssembly is:
 
 ```java
-public class TestWigetAssembly<W extends Wiget,T> extends WigetAssembly<TestWigetFamily,PrintWriter, W,T> {
+public class TestWigetAssembly<W extends Wiget,T> extends WigetAssembly<TestWigetFamily,PrintWriter, W,T> { // <-- (1)
 
-	public TestWigetAssembly(
+	public TestWigetAssembly(									// <-- (2)
 			WigetFactory<TestWigetFamily, PrintWriter> factory, 
 			Class<W> wigetType) {
 		super(factory, wigetType);
 	}
+	
+	// <-- (3)
 }
 ```
+
+1.	The specific extension of the abstract wiget assembly specifies the wiget family and the output type
+1.	The constructor of the specific extension of the abstract wiget assembly receives a factory with the appropriate type arguments.  
+1.	This example is trivial however since each assembled wiget is linked to the assembly that it is in and an when outputting a wiget the assembled wiget that is driving the wigets values is available, the wiget assembly that is outputting the wiget is also available. Consequently the by endowing the wiget assembly type with the ability to, for example, manage an indentation level or index wigets in an assembly, allows wigets to be aware of each other or how deeply they are embedded or indeed anything else during assembly output
+
 
 And TestWigetFamily is:
 
 ```java
-public class TestWigetFamily extends WigetFamily<PrintWriter> {
+public class TestWigetFamily extends WigetFamily<PrintWriter> {	// <-- (1)
 
 	public TestWigetFamily() {
-		super("TestWigetFamily", PrintWriter.class, TestWigetA.class, TestWigetB.class, TestWigetC.class);
+		super("TestWigetFamily", PrintWriter.class, TestWigetA.class, TestWigetB.class, TestWigetC.class); // <-- (2)
 	}
 }
 ```
 
+1.	The specific extension of the abstract wiget family defines the output type of the wiget family
+1.	The constructor of the specific extension of the abstract wiget family defines the array of wigets that must be implmented in order for the family to be considered complete and therefore used to instantiate a wiget factory
+
 And TestWigetA is:
 
 ```java
-@WigetSpecification
-public interface TestWigetA extends TestWiget<TypeA> {
+@WigetSpecification	// <-- (1)
+public interface TestWigetA extends TestWiget<TypeA> { // <-- (2)
 	
-	public static class Model{
+	public static class Model{	// <-- (3)
 		public WigetParameter<TestWigetA, Integer> number;
 		public WigetParameter<TestWigetA, String> alias;
 		public WigetParameter<TestWigetA, String> title;
 		public WigetContainer<TestWigetA> cont1;
 		public WigetContainer<TestWigetA> cont2;
 	}
-	public static final Model model = new Model();
-	@Override public default Object staticModel() { return model; }
-	@Override public default Class<?> modelType() { return Model.class; }
+	public static final Model model = new Model(); // <-- (4)
+	@Override public default Object staticModel() { return model; } // <-- (5)
+	@Override public default Class<?> modelType() { return Model.class; } // <-- (6)
 }
 ```
+
+1.	Wiget specifications are annotated with the `@WigetSpecification` annotation
+1.	A wiget specification is an interface that extends the wiget families base interface and defines the wigets requires data type
+1.	A wiget specification defines a static model type with WigetParameter fields for each of the getter style methods of the wigets requires data type. These are the wigets parameters. The static model also contains WigetContainer fields for each of the containers of the wiget.
+1.	A wiget specification includes a static instance of the static model type. The field values of this static instance are populates when the implementation of the wiget is registered by the wiget factory.
+1.	A wiget specification includes a method to retrieve the static instance of the static model so that it can be populated during registration of the wiget imlementation by the wiget factory
+1.	A wiget specification defines a method to return the class of the static model. This is used to create an instance of the static model each time a wiget assembled. This instance of the static model is used to control the value source for the parameters for that specific instance of wiget in the larger assembly. This makes the use of wiget and wiget assemblies thread safe.
 
 The implementation of TestWigetA in the package `com.k2.Wiget.testWigets.impl` is :
 
 ```java
-@WigetImplementation
-public class TestWigetAImpl extends ATestWiget<TypeA> implements TestWigetA{
+@WigetImplementation	// <-- (1)
+public class TestWigetAImpl extends ATestWiget<TypeA> implements TestWigetA{	// <-- (2)
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public PrintWriter output(
-			AssembledWiget<TestWigetFamily, PrintWriter, ? extends Wiget, TypeA> a,
+	public PrintWriter output(	// <-- (3)
+			AssembledWiget<TestWigetFamily, PrintWriter, ? extends Wiget, TypeA> a, // <--(4)
 			PrintWriter out) {
 		
 		out.println("Test wiget A");
-		out.println("Number: "+a.get(TestWigetA.model.number));
+		out.println("Number: "+a.get(TestWigetA.model.number));	// <--(5)
 		out.println("Alias: "+a.get(TestWigetA.model.alias));
 		out.println("Title: "+a.get(TestWigetA.model.title));
 		
-		return out;
+		return out;	// <-- (6)
 	}
 }
 ```
+
+1.	Wiget implementations are annotated with the `@WigetImplementation` annotation
+1.	A wiget implementation extends the families abstract base wiget, identifes the requires data type of the wiget and implements the interface of the wiget for which it is an implementation
+1.	A wiget implementation implements the `output(...)` method of the wiget interface.  The output method of the wiget is used to generate the output of the wiget with a specific set of input values.
+1.	The wigets parameter values and contained wigets are supplied through the assembled wiget passed into the wigets `output(...)` method
+1.	The value of a particualr parameter is extracted from the assembled wiget by passing the static wiget parameter field of the static model to the `get(...)` method of the wiget assembly
+1.	The instance of the output type is returned after it has been updated with the values from the wiget assembly
 
 And TypeA is:
 
@@ -187,6 +217,194 @@ Maven users can add this project using the following additions to the pom.xml fi
 ```
 
 ## Working With Wigets
+
+### Wiget Source Data Type
+
+Wigets expect values from a defined data type. However it is not necessary to supply a wiget with an instance of the required data type.
+
+If the wiget factory has an adapter factory set then if the source data received by a wiget is not of the required type then the adapater factory is automatically inspected to adapt the recieved data type to the required data type
+
+If the received source data cannot be adapted to the required data type then a null value is returned for any parameter that has not been explicitly set.
+
+The source below shows creating a wiget factory with an associated adapter factory.
+
+```java
+TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl"); // <-- (1)
+factory.setAdapterFactory(AdapterFactory.register("com.k2.Wiget.testAdapters")) // <-- (2)
+```
+
+1.	Create a wiget factory scanning the given packages for wiget implementations
+1.	Assign an adpater factory to the created wiget factory with adapters found in the given packages
+
+###  Using Collections As The Wiget Data Source
+
+If a collation is used to supply source data to a wiget then the collection is iterated over and a the wiget is output for each item in the collection.
+
+Each item in the collection is assessed for compatibility with the wigets required type and adapted if possible/necessary
+
+### Assembling Wigets
+
+An assembly of wigets always starts with a root wiget and is always returned by the `getAssembly(...)` method of the wiget factory.
+
+#### Setting Wiget Parameters
+
+An assembled wiget can set literal values for its parameters.  If the value of a specific parameter has been set on the assemnbled wiget then that value is used rather than any value supplied or not by the data source supplied to the wiget.
+
+The example below shows setting the parameter values on an assembled wiget.
+
+```java
+TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
+
+TestWigetAssembly<TestWigetA, TypeA> wa = factory.getAssembly(TestWigetA.class);
+wa.root()											// <-- (1)
+	.set(TestWigetA.model.alias, "SetAlias") 		// <-- (2)
+	.set(TestWigetA.model.alias, "SetAliasAgain"); 	// <-- (3)
+```
+
+1.	The `root()` method of a wiget assembly return the root assembled wiget.
+1.	Wiget parameters are set by calling the `set(...)` method of the assembled wiget and passing in the static wiget parameter from the wigets static model.
+1.	Repeated attempts to set the wiget parameter will result in the last value set being used in the output
+
+#### Containing Wigets In Assembled Wigets
+
+An assembled wiget can contain other assembled wigets in its wiget containers.
+
+The example below shows assembling wigets in a wiget assembly
+
+```java
+TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
+
+TestWigetAssembly<TestWigetC, TypeC> wa = factory.getAssembly(TestWigetC.class);
+wa.root()
+	.add(TestWigetC.model.cont1, TestWigetA.class, TestWigetC.model.a)	// <-- (1)
+		.set(TestWigetA.model.alias, "SetAlias")							// <-- (2)
+		.up()															// <-- (3)
+	.add(TestWigetC.model.cont1, TestWigetA.class, TestWigetC.model.a)
+		.set(TestWigetA.model.title, "Set Title")
+		.add(TestWigetC.model.cont2, TestWigetB.class, TestWigetC.model.bs)
+			.root();														// <-- (4)
+```
+
+1.	The `add(...)` method of a wiget assembly adds a new assembled wiget to the container identified by the container field of the containing wigets static model for the given wiget to be output using the value supplied by the parameter identified by the parameter field of the containing wigets static model.  
+1.	The `add(...)` method returns the assembled wiget added and so parameters on the added assembled wiget can be set.
+1.	The `up()` method of an assembled wiget return the parent assembled wiget from the wiget assembly.
+1.	The `root()` method of an assembled wiget is a short hand method for returning to the root assembled wiget of the wiget assembly. It has the same effect as repeated calls to the `up()` method to return to the root assembled wiget.
+
+Contained wigets can be optionally included in the generated output.
+
+The example below shows adding a conditional wiget assembly 
+
+```java
+TestWigetFactory factory = new TestWigetFactory("com.k2.Wiget.testWigets.impl");
+
+PredicateBuilder pb = new PredicateBuilder();			// <-- (1)
+
+TestWigetAssembly<TestWigetC, TypeC> wa = factory.getAssembly(TestWigetC.class);
+wa.root()
+	.addIf(pb.equals(TestWigetC.model.alias, "WigetC"), 	// <-- (2)
+			TestWigetC.model.cont1, TestWigetA.class, TestWigetC.model.a)  
+		.up()
+```
+
+1.	Conditional assembled wigets are conditional on a `Predicate` so we need a predicate builder to supply a predicate
+1.	The `addIf(...)` method of an assembled wiget takes the same parameters as the `add(...)` method plus an additional predicate parameter. The predicates are evaluated using the parameter values from the assembled wiget that **CONTAINS** the conditional wiget.
+
+### Developing Wigets
+
+The defintion of a wiget exists in two parts. The wiget specification and the wiget implementation.
+
+The wiget specification is an interface that defines how to interact with the wiget and the wiget implementation is an implementation of that interface.
+
+#### Wiget Specifications
+
+The code below shows an example of a wiget specification.
+
+```java
+@WigetSpecification	// <-- (1)
+public interface TestWigetA extends TestWiget<TypeA> { // <-- (2)
+	
+	public static class Model{	// <-- (3)
+		public WigetParameter<TestWigetA, Integer> number;
+		public WigetParameter<TestWigetA, String> alias;
+		public WigetParameter<TestWigetA, String> title;
+		public WigetContainer<TestWigetA> cont1;
+		public WigetContainer<TestWigetA> cont2;
+	}
+	public static final Model model = new Model(); // <-- (4)
+	@Override public default Object staticModel() { return model; } // <-- (5)
+	@Override public default Class<?> modelType() { return Model.class; } // <-- (6)
+}
+```
+
+1.	Wiget specifications are annotated with the `@WigetSpecification` annotation
+1.	A wiget specification is an interface that extends the wiget families base interface and defines the wigets requires data type
+1.	A wiget specification defines a static model type with WigetParameter fields for each of the getter style methods of the wigets requires data type. These are the wigets parameters. The static model also contains WigetContainer fields for each of the containers of the wiget.
+1.	A wiget specification includes a static instance of the static model type. The field values of this static instance are populates when the implementation of the wiget is registered by the wiget factory.
+1.	A wiget specification includes a method to retrieve the static instance of the static model so that it can be populated during registration of the wiget imlementation by the wiget factory
+1.	A wiget specification defines a method to return the class of the static model. This is used to create an instance of the static model each time a wiget assembled. This instance of the static model is used to control the value source for the parameters for that specific instance of wiget in the larger assembly. This makes the use of wiget and wiget assemblies thread safe.
+
+#### Wiget Implementations
+
+The code below shows an example of a wiget implementation
+
+```java
+@WigetImplementation	// <-- (1)
+public class TestWigetAImpl extends ATestWiget<TypeA> implements TestWigetA{	// <-- (2)
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public PrintWriter output(	// <-- (3)
+			AssembledWiget<TestWigetFamily, PrintWriter, ? extends Wiget, TypeA> a, // <--(4)
+			PrintWriter out) {
+		
+		out.println("Test wiget A");
+		out.println("Number: "+a.get(TestWigetA.model.number));	// <--(5)
+		out.println("Alias: "+a.get(TestWigetA.model.alias));
+		out.println("Title: "+a.get(TestWigetA.model.title));
+		
+		return out;	// <-- (6)
+	}
+}
+```
+
+1.	Wiget implementations are annotated with the `@WigetImplementation` annotation
+1.	A wiget implementation extends the families abstract base wiget, identifes the requires data type of the wiget and implements the interface of the wiget for which it is an implementation
+1.	A wiget implementation implements the `output(...)` method of the wiget interface.  The output method of the wiget is used to generate the output of the wiget with a specific set of input values.
+1.	The wigets parameter values and contained wigets are supplied through the assembled wiget passed into the wigets `output(...)` method
+1.	The value of a particualr parameter is extracted from the assembled wiget by passing the static wiget parameter field of the static model to the `get(...)` method of the wiget assembly
+1.	The instance of the output type is returned after it has been updated with the values from the wiget assembly
+
+In addition to the `get(...)` method of an assembled wiget to get a parameter value this is also an `outputContents(...)` method.
+
+The example below show an output method of a  wiget implementation that uses the `outputContents(...)` method to include the contents of containers in the wigets output.
+
+```java
+public PrintWriter output(
+		AssembledWiget<TestWigetFamily, PrintWriter, ? extends Wiget, TypeC> a,
+		PrintWriter out) {
+	
+	out.println("Test wiget C");
+	out.println("Container C 1 {");
+	out = a.outputContents(TestWigetC.model.cont1, out); // <-- (1) 
+	out.println("}");
+
+	out.println("Container C 2 {");
+	out = a.outputContents(TestWigetC.model.cont2, out); // <-- (2)
+	out.println("}");
+	
+	return out;
+}
+```C
+1.	This call to `outputContents(...)` causes the contents of container `cont1` of this assembled wiget to be included in the output at this point in the order in which they were added to the container.
+1.	The call to `outputContents(...)` outputs the contents of container `cont2`
+
+
+
+
+
+
+
+
 
 
 
