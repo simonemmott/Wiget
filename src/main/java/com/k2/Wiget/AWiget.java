@@ -67,7 +67,7 @@ public abstract class AWiget<F extends WigetFamily<O>,O,T> implements Wiget<F, O
 		try {
 			Object model = modelType().newInstance();
 			for (Method m : ClassUtil.getAllMethods(requiresType)) {
-				if (m.getParameterCount()==0 && m.getReturnType() != void.class) {
+				if (m.getParameterCount()==0 && m.getReturnType() != void.class  && m.getName().startsWith("get")) {
 					String alias = ClassUtil.getAliasFromMethod(m);
 					Field f = ClassUtil.getField(model.getClass(), alias);
 					f.set(model, new MappedWigetParameter(alias, f, m));
