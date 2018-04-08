@@ -47,4 +47,8 @@ public class WigetAssembly<F extends WigetFamily<O>, O, W extends Wiget,T> {
 		return root.output(dataSource, out);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <Q extends Wiget> AssembledWiget<F,O,Q,?> assemble(Class<Q> wigetType) {
+		return new AssembledWiget(this, wigetType);
+	}
 }

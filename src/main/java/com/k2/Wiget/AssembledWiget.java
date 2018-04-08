@@ -107,6 +107,14 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 		this.valueFrom = valueFrom;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public AssembledWiget(WigetAssembly<F,O,W,?> assembly, AssembledWiget<F,O,?,?> parent, Class<W> wigetType) {
+		this.assembly = assembly;
+		this.parent = parent;
+		this.wiget = (W) assembly.factory().getWiget(wigetType);
+		this.model = wiget.generateModel();
+	}
+
 	/**
 	 * Output the contents of the given container of this assembled wiget in the order in which the contents were added to the assembled wiget container
 	 * @param container		The container for which to output the contents
@@ -123,7 +131,7 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 			// contained assembled wiget as the contained assembled wigets data source
 			if (cw instanceof AssembledWiget) {
 				AssembledWiget<F,O,?,?> aw = (AssembledWiget)cw;
-				Object dataSource = get(aw.valueFrom);
+				Object dataSource = (aw.valueFrom==null) ? typedDataSource : get(aw.valueFrom);
 				out = aw.output(dataSource, out);
 			// If the item is a container binding then output the container binding
 			} else if (cw instanceof ContainerBinding){
@@ -147,6 +155,10 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 			if ( ! includeCriteria.evaluate(parent))
 				return out;
 		}
+		if (dataSource == null) {
+			out = outputNoCollection(null, out);
+			return out;
+		}
 		
 		// If the data source is a Collection
 		if (dataSource instanceof Collection) {
@@ -169,6 +181,9 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 	 */
 	@SuppressWarnings("unchecked")
 	private O outputNoCollection(Object dataSource, O out) {
+		
+		if (dataSource == null)
+			return typedOutput(null, out);
 		
 		// If the data source is the type required by the wiget output the wiget using the data source
 		if (wiget.requiresType().isAssignableFrom(dataSource.getClass())) {
@@ -209,6 +224,7 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 	public <V> V get(WigetParameter<?, V> parameter) {
 		// Evaluate the wiget parameter referenced by the this parameter on this assembled wigets model using this assembled wiget as an evaluator
 		try {
+			if (parameter==null) return null;
 			WigetParameter<W, V> wp = (WigetParameter<W, V>) parameter.getModelField().get(model);
 			return wp.evaluate(this);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -396,6 +412,12 @@ public class AssembledWiget<F extends WigetFamily<O>,O,W extends Wiget,T> implem
 	 * @return	The root assembled wiget
 	 */
 	public AssembledWiget<F,O,?,?> root() { return assembly.root(); }
+
+	@SuppressWarnings("unchecked")
+	public <Q extends Wiget> AssembledWiget<F,O,Q,?>  add(WigetContainer<?> container, Class<Q> containedWigetType) {
+		AssembledWiget aw = new AssembledWiget(assembly, this, containedWigetType);
+		return get((WigetContainer<W>)container).add(aw);
+	}
 
 
 }

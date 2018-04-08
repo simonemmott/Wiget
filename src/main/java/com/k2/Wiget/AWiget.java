@@ -63,14 +63,19 @@ public abstract class AWiget<F extends WigetFamily<O>,O,T> implements Wiget<F, O
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object generateModel() {
-		logger.trace("Generating wiget model for {}", this.getClass().getName());
+		logger.trace("Generating wiget model for {} requires {}", this.getClass().getName(), requiresType.getSimpleName());
 		try {
 			Object model = modelType().newInstance();
 			for (Method m : ClassUtil.getAllMethods(requiresType)) {
+				logger.trace("Checking wiget parameter for getter {}.{}()",requiresType.getSimpleName(), m.getName());
 				if (m.getParameterCount()==0 && m.getReturnType() != void.class  && m.getName().startsWith("get")) {
 					String alias = ClassUtil.getAliasFromMethod(m);
-					Field f = ClassUtil.getField(model.getClass(), alias);
-					f.set(model, new MappedWigetParameter(alias, f, m));
+					logger.trace("Assiigning wiget paramter for getter method {}.{}() to static model field with alias {}", requiresType.getSimpleName(), m.getName(), alias) ; 
+					Field f = ClassUtil.getField(model.getClass(), alias, false);
+					if (f != null)
+						f.set(model, new MappedWigetParameter(alias, f, m));
+					else
+						logger.warn("No static model field available for {} wiget {}", alias, this.getClass().getName());
 				}
 			}
 			for (Field f : ClassUtil.getDeclaredFields(model.getClass())) {
